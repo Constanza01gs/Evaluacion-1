@@ -1,0 +1,52 @@
+/* ==========================================
+   ESTILOS GENERALES
+========================================== */
+
+body {
+    background-color: #f4f6f9;
+    color: #212529;
+}
+
+
+/* ==========================================
+   NAVEGACIÓN
+========================================== */
+
+.navbar-brand {
+    letter-spacing: 0.5px;
+}
+
+
+/* ==========================================
+   CONTENIDO PRINCIPAL
+========================================== */
+
+main {
+    min-height: 80vh;
+}
+
+h1 {
+    color: #1f3c88;
+}
+
+
+/* ==========================================
+   TARJETAS Y TABLAS
+========================================== */
+
+.card {
+    border: none;
+    border-radius: 12px;
+}
+
+.card-header {
+    border-bottom: 1px solid #e9ecef;
+}
+
+table {
+    margin-bottom: 0;
+}
+
+thead th {
+    color: #495057;
+}

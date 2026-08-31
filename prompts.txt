@@ -1,0 +1,323 @@
+============================================================
+USO DE INTELIGENCIA ARTIFICIAL
+EVALUACIÓN N°1 - DESARROLLO BACKEND CON DJANGO & DRF
+============================================================
+
+Herramienta utilizada:
+ChatGPT
+
+============================================================
+PROMPT 1
+DISEÑO DE PLANTILLAS Y MAQUETACIÓN HTML / BOOTSTRAP
+============================================================
+
+PROMPT UTILIZADO:
+
+Estoy desarrollando un Sistema de Gestión Académica con Django
+y Django REST Framework.
+
+El proyecto se llama academic_project y la aplicación se llama
+academic.
+
+Necesito diseñar las plantillas HTML usando Bootstrap 5 mediante
+CDN.
+
+Debo crear las siguientes plantillas dentro de:
+
+templates/academic/
+
+- base.html
+- home.html
+- courses.html
+- students.html
+
+Requisitos:
+
+1. base.html debe contener la estructura general del sitio y
+   un menú de navegación.
+
+2. El menú debe tener acceso a:
+   - Inicio
+   - Asignaturas
+   - Estudiantes
+   - Panel de Administración de Django.
+
+3. Usar Bootstrap mediante CDN, sin instalar Bootstrap como
+   paquete de Python.
+
+4. home.html debe ser la página de inicio del Sistema de Gestión
+   Académica y debe tener una presentación sencilla con accesos
+   hacia Asignaturas y Estudiantes.
+
+5. courses.html debe mostrar las asignaturas registradas y el
+   profesor asociado a cada una.
+
+6. students.html debe mostrar los estudiantes registrados.
+
+7. La interfaz debe ser limpia, sencilla, responsiva y adecuada
+   para una aplicación académica.
+
+8. Las plantillas deben extender base.html para reutilizar la
+   navegación y estructura general.
+
+9. Las páginas deben consumir los endpoints de Django REST
+   Framework en segundo plano mediante JavaScript y fetch(),
+   sin enviar al usuario directamente a las páginas de la API.
+
+10. En las páginas de Asignaturas y Estudiantes debe existir
+    CRUD completo:
+    crear, consultar, editar y eliminar registros.
+
+11. Las acciones de edición y eliminación deben aparecer como
+    botones visibles en cada registro.
+
+12. Para las operaciones POST, PUT y DELETE se debe utilizar
+    el token CSRF de Django.
+
+
+============================================================
+RESPUESTA GENERADA POR IA
+============================================================
+
+Se propuso utilizar una plantilla base reutilizable con Bootstrap
+5 mediante CDN.
+
+La estructura propuesta fue:
+
+academic/
+    templates/
+        academic/
+            base.html
+            home.html
+            courses.html
+            students.html
+
+base.html:
+- Contiene Bootstrap mediante CDN.
+- Contiene el menú de navegación.
+- Carga el archivo CSS propio.
+- Contiene los bloques:
+  title
+  content
+  scripts
+- Incluye el token CSRF.
+
+home.html:
+- Presenta el Sistema de Gestión Académica.
+- Incluye tarjetas de acceso a:
+  Asignaturas
+  Estudiantes.
+
+courses.html:
+- Incluye un formulario para registrar asignaturas.
+- Incluye un select para seleccionar al profesor.
+- Muestra una tabla con:
+  ID
+  Asignatura
+  Profesor
+  Acciones
+- Permite Crear, Listar, Editar y Eliminar asignaturas.
+- Consume:
+  /api/courses/
+  /api/teachers/
+  mediante fetch().
+
+students.html:
+- Incluye un formulario para registrar estudiantes.
+- Muestra una tabla con:
+  ID
+  Nombre
+  Apellido
+  Acciones
+- Permite Crear, Listar, Editar y Eliminar estudiantes.
+- Consume:
+  /api/students/
+  mediante fetch().
+
+Para la presentación visual se utilizaron componentes de
+Bootstrap como:
+
+- navbar
+- container
+- row
+- col
+- card
+- table
+- form-control
+- form-select
+- btn
+- table-responsive
+
+Las operaciones del CRUD utilizan:
+
+GET
+POST
+PUT
+DELETE
+
+Las operaciones POST, PUT y DELETE envían el token CSRF mediante
+la cabecera X-CSRFToken.
+
+
+============================================================
+PROMPT 2
+GENERACIÓN DE DATOS SIMULADOS EN FORMATO JSON
+============================================================
+
+PROMPT UTILIZADO:
+
+Estoy desarrollando un Sistema de Gestión Académica en Django.
+
+Necesito generar una estructura de datos ficticios en formato
+JSON para utilizar como datos de prueba.
+
+La aplicación Django se llama academic y posee las siguientes
+entidades:
+
+Teacher:
+- id
+- first_name
+- last_name
+
+Course:
+- id
+- name
+- teacher_id
+
+Student:
+- id
+- first_name
+- last_name
+
+StudentCourse:
+- student_id
+- course_id
+
+Genera un fixture JSON válido de Django que contenga:
+
+- 3 profesores.
+- 3 asignaturas.
+- 3 estudiantes.
+- 3 relaciones entre estudiantes y asignaturas.
+
+Los datos deben ser ficticios pero coherentes.
+
+Cada Course debe hacer referencia a un Teacher existente.
+
+Cada StudentCourse debe hacer referencia a un Student y Course
+existentes.
+
+El JSON debe poder guardarse como:
+
+academic/fixtures/datos_prueba.json
+
+y posteriormente cargarse mediante:
+
+python manage.py loaddata datos_prueba.json
+
+
+============================================================
+RESPUESTA GENERADA POR IA
+============================================================
+
+[
+    {
+        "model": "academic.teacher",
+        "pk": 1,
+        "fields": {
+            "first_name": "Marcelo",
+            "last_name": "Alvarado"
+        }
+    },
+    {
+        "model": "academic.teacher",
+        "pk": 2,
+        "fields": {
+            "first_name": "Carolina",
+            "last_name": "Soto"
+        }
+    },
+    {
+        "model": "academic.teacher",
+        "pk": 3,
+        "fields": {
+            "first_name": "Felipe",
+            "last_name": "Muñoz"
+        }
+    },
+
+    {
+        "model": "academic.course",
+        "pk": 1,
+        "fields": {
+            "name": "Programación Backend",
+            "teacher": 1
+        }
+    },
+    {
+        "model": "academic.course",
+        "pk": 2,
+        "fields": {
+            "name": "Base de Datos",
+            "teacher": 2
+        }
+    },
+    {
+        "model": "academic.course",
+        "pk": 3,
+        "fields": {
+            "name": "Desarrollo Web",
+            "teacher": 3
+        }
+    },
+
+    {
+        "model": "academic.student",
+        "pk": 1,
+        "fields": {
+            "first_name": "Ana",
+            "last_name": "Pérez"
+        }
+    },
+    {
+        "model": "academic.student",
+        "pk": 2,
+        "fields": {
+            "first_name": "Diego",
+            "last_name": "González"
+        }
+    },
+    {
+        "model": "academic.student",
+        "pk": 3,
+        "fields": {
+            "first_name": "Camila",
+            "last_name": "Rojas"
+        }
+    },
+
+    {
+        "model": "academic.studentcourse",
+        "pk": 1,
+        "fields": {
+            "student": 1,
+            "course": 1
+        }
+    },
+    {
+        "model": "academic.studentcourse",
+        "pk": 2,
+        "fields": {
+            "student": 2,
+            "course": 2
+        }
+    },
+    {
+        "model": "academic.studentcourse",
+        "pk": 3,
+        "fields": {
+            "student": 3,
+            "course": 3
+        }
+    }
+]

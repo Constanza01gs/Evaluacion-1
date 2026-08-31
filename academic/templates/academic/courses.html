@@ -1,0 +1,547 @@
+{% extends 'academic/base.html' %}
+
+{% block title %}
+Asignaturas | Gestión Académica
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==========================================
+     ENCABEZADO
+=========================================== -->
+<section class="mb-4">
+    <h1 class="fw-bold">Gestión de Asignaturas</h1>
+
+    <p class="text-muted">
+        Crea, consulta, modifica y elimina asignaturas.
+    </p>
+</section>
+
+
+<div class="row g-4">
+
+    <!-- ==========================================
+         FORMULARIO
+    =========================================== -->
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0" id="titulo-formulario">
+                    Nueva Asignatura
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <form id="form-curso">
+
+                    <!-- Nombre de la asignatura -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Nombre de la asignatura
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombre-curso"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Docente -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Profesor
+                        </label>
+
+                        <select
+                            id="profesor-curso"
+                            class="form-select"
+                            required
+                        >
+                            <option value="">
+                                Seleccione un profesor
+                            </option>
+                        </select>
+
+                    </div>
+
+
+                    <!-- Botones -->
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="boton-guardar-curso"
+                    >
+                        Guardar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary d-none"
+                        id="boton-cancelar-curso"
+                    >
+                        Cancelar
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         LISTADO
+    =========================================== -->
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    Asignaturas registradas
+                </h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Asignatura</th>
+                                <th>Profesor</th>
+                                <th>Acciones</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="tabla-cursos">
+
+                            <tr>
+                                <td colspan="4" class="text-center">
+                                    Cargando asignaturas...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+    // ==========================================
+    // VARIABLES GENERALES
+    // ==========================================
+
+    let cursoEnEdicion = null;
+
+    const formulario =
+        document.getElementById('form-curso');
+
+    const nombreCurso =
+        document.getElementById('nombre-curso');
+
+    const profesorCurso =
+        document.getElementById('profesor-curso');
+
+    const tituloFormulario =
+        document.getElementById('titulo-formulario');
+
+    const botonGuardar =
+        document.getElementById('boton-guardar-curso');
+
+    const botonCancelar =
+        document.getElementById('boton-cancelar-curso');
+
+
+    // ==========================================
+    // OBTENER TOKEN CSRF
+    // ==========================================
+
+    function obtenerCsrfToken() {
+
+        return document.querySelector(
+            '[name=csrfmiddlewaretoken]'
+        ).value;
+
+    }
+
+
+    // ==========================================
+    // CARGAR PROFESORES EN EL SELECT
+    // ==========================================
+
+    function cargarProfesores() {
+
+        fetch('/api/teachers/')
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                profesorCurso.innerHTML = `
+                    <option value="">
+                        Seleccione un profesor
+                    </option>
+                `;
+
+                data.forEach(teacher => {
+
+                    profesorCurso.innerHTML += `
+                        <option value="${teacher.id}">
+                            ${teacher.first_name}
+                            ${teacher.last_name}
+                        </option>
+                    `;
+
+                });
+
+            })
+
+            .catch(error => {
+                console.error(
+                    'Error al cargar profesores:',
+                    error
+                );
+            });
+    }
+
+
+    // ==========================================
+    // CARGAR ASIGNATURAS
+    // ==========================================
+
+    function cargarCursos() {
+
+        fetch('/api/courses/')
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                const tabla =
+                    document.getElementById(
+                        'tabla-cursos'
+                    );
+
+                tabla.innerHTML = '';
+
+
+                if (data.length === 0) {
+
+                    tabla.innerHTML = `
+                        <tr>
+                            <td
+                                colspan="4"
+                                class="text-center text-muted"
+                            >
+                                No existen asignaturas registradas.
+                            </td>
+                        </tr>
+                    `;
+
+                    return;
+                }
+
+
+                data.forEach(course => {
+
+                    tabla.innerHTML += `
+                        <tr>
+
+                            <td>
+                                ${course.id}
+                            </td>
+
+                            <td>
+                                ${course.name}
+                            </td>
+
+                            <td>
+                                ${course.teacher_name}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="btn btn-warning btn-sm"
+                                    onclick="editarCurso(
+                                        ${course.id},
+                                        '${course.name.replace(/'/g, "\\'")}',
+                                        ${course.teacher}
+                                    )"
+                                >
+                                    Editar
+                                </button>
+
+                                <button
+                                    class="btn btn-danger btn-sm"
+                                    onclick="eliminarCurso(${course.id})"
+                                >
+                                    Eliminar
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    `;
+
+                });
+
+            })
+
+            .catch(error => {
+
+                console.error(
+                    'Error al cargar asignaturas:',
+                    error
+                );
+
+            });
+    }
+
+
+    // ==========================================
+    // CREAR O ACTUALIZAR ASIGNATURA
+    // ==========================================
+
+    formulario.addEventListener(
+        'submit',
+        function(event) {
+
+            event.preventDefault();
+
+
+            const datos = {
+
+                name: nombreCurso.value,
+
+                teacher: profesorCurso.value
+
+            };
+
+
+            // Si existe un ID estamos editando.
+            const url = cursoEnEdicion
+                ? `/api/courses/${cursoEnEdicion}/`
+                : '/api/courses/';
+
+
+            const metodo = cursoEnEdicion
+                ? 'PUT'
+                : 'POST';
+
+
+            fetch(url, {
+
+                method: metodo,
+
+                headers: {
+
+                    'Content-Type':
+                        'application/json',
+
+                    'X-CSRFToken':
+                        obtenerCsrfToken()
+
+                },
+
+                body: JSON.stringify(datos)
+
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+                    throw new Error(
+                        'No se pudo guardar la asignatura.'
+                    );
+                }
+
+                return response.json();
+
+            })
+
+            .then(() => {
+
+                limpiarFormulario();
+
+                cargarCursos();
+
+            })
+
+            .catch(error => {
+
+                alert(
+                    'Error al guardar la asignatura.'
+                );
+
+                console.error(error);
+
+            });
+
+        }
+    );
+
+
+    // ==========================================
+    // PREPARAR EDICIÓN
+    // ==========================================
+
+    function editarCurso(
+        id,
+        nombre,
+        profesor
+    ) {
+
+        cursoEnEdicion = id;
+
+        nombreCurso.value = nombre;
+
+        profesorCurso.value = profesor;
+
+        tituloFormulario.textContent =
+            'Editar Asignatura';
+
+        botonGuardar.textContent =
+            'Actualizar';
+
+        botonCancelar.classList.remove(
+            'd-none'
+        );
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+    }
+
+
+    // ==========================================
+    // ELIMINAR ASIGNATURA
+    // ==========================================
+
+    function eliminarCurso(id) {
+
+        const confirmar = confirm(
+            '¿Desea eliminar esta asignatura?'
+        );
+
+
+        if (!confirmar) {
+            return;
+        }
+
+
+        fetch(`/api/courses/${id}/`, {
+
+            method: 'DELETE',
+
+            headers: {
+
+                'X-CSRFToken':
+                    obtenerCsrfToken()
+
+            }
+
+        })
+
+        .then(response => {
+
+            if (!response.ok) {
+                throw new Error(
+                    'No se pudo eliminar.'
+                );
+            }
+
+            cargarCursos();
+
+        })
+
+        .catch(error => {
+
+            alert(
+                'No se pudo eliminar la asignatura.'
+            );
+
+            console.error(error);
+
+        });
+
+    }
+
+
+    // ==========================================
+    // LIMPIAR FORMULARIO
+    // ==========================================
+
+    function limpiarFormulario() {
+
+        cursoEnEdicion = null;
+
+        formulario.reset();
+
+        tituloFormulario.textContent =
+            'Nueva Asignatura';
+
+        botonGuardar.textContent =
+            'Guardar';
+
+        botonCancelar.classList.add(
+            'd-none'
+        );
+
+    }
+
+
+    // Cancelar edición.
+    botonCancelar.addEventListener(
+        'click',
+        limpiarFormulario
+    );
+
+
+    // ==========================================
+    // CARGA INICIAL
+    // ==========================================
+
+    cargarProfesores();
+
+    cargarCursos();
+
+</script>
+
+{% endblock %}

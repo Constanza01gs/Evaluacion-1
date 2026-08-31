@@ -1,0 +1,541 @@
+{% extends 'academic/base.html' %}
+
+{% block title %}
+Estudiantes | Gestión Académica
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==========================================
+     ENCABEZADO
+=========================================== -->
+<section class="mb-4">
+
+    <h1 class="fw-bold">
+        Gestión de Estudiantes
+    </h1>
+
+    <p class="text-muted">
+        Crea, consulta, modifica y elimina estudiantes.
+    </p>
+
+</section>
+
+
+<div class="row g-4">
+
+    <!-- ==========================================
+         FORMULARIO
+    =========================================== -->
+    <div class="col-lg-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-white">
+
+                <h5
+                    class="mb-0"
+                    id="titulo-formulario-estudiante"
+                >
+                    Nuevo Estudiante
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <form id="form-estudiante">
+
+                    <!-- Nombre -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Nombre
+                        </label>
+
+                        <input
+                            type="text"
+                            id="nombre-estudiante"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Apellido -->
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Apellido
+                        </label>
+
+                        <input
+                            type="text"
+                            id="apellido-estudiante"
+                            class="form-control"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- Botones -->
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                        id="boton-guardar-estudiante"
+                    >
+                        Guardar
+                    </button>
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary d-none"
+                        id="boton-cancelar-estudiante"
+                    >
+                        Cancelar
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==========================================
+         TABLA
+    =========================================== -->
+    <div class="col-lg-8">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header bg-white">
+
+                <h5 class="mb-0">
+                    Estudiantes registrados
+                </h5>
+
+            </div>
+
+
+            <div class="card-body">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle">
+
+                        <thead class="table-light">
+
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>Acciones</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="tabla-estudiantes">
+
+                            <tr>
+                                <td
+                                    colspan="4"
+                                    class="text-center"
+                                >
+                                    Cargando estudiantes...
+                                </td>
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+<script>
+
+    // ==========================================
+    // VARIABLES GENERALES
+    // ==========================================
+
+    let estudianteEnEdicion = null;
+
+    const formularioEstudiante =
+        document.getElementById(
+            'form-estudiante'
+        );
+
+    const nombreEstudiante =
+        document.getElementById(
+            'nombre-estudiante'
+        );
+
+    const apellidoEstudiante =
+        document.getElementById(
+            'apellido-estudiante'
+        );
+
+    const tituloFormulario =
+        document.getElementById(
+            'titulo-formulario-estudiante'
+        );
+
+    const botonGuardar =
+        document.getElementById(
+            'boton-guardar-estudiante'
+        );
+
+    const botonCancelar =
+        document.getElementById(
+            'boton-cancelar-estudiante'
+        );
+
+
+    // ==========================================
+    // TOKEN CSRF
+    // ==========================================
+
+    function obtenerCsrfToken() {
+
+        return document.querySelector(
+            '[name=csrfmiddlewaretoken]'
+        ).value;
+
+    }
+
+
+    // ==========================================
+    // CARGAR ESTUDIANTES
+    // ==========================================
+
+    function cargarEstudiantes() {
+
+        fetch('/api/students/')
+
+            .then(response => response.json())
+
+            .then(data => {
+
+                const tabla =
+                    document.getElementById(
+                        'tabla-estudiantes'
+                    );
+
+                tabla.innerHTML = '';
+
+
+                if (data.length === 0) {
+
+                    tabla.innerHTML = `
+                        <tr>
+
+                            <td
+                                colspan="4"
+                                class="text-center text-muted"
+                            >
+                                No existen estudiantes registrados.
+                            </td>
+
+                        </tr>
+                    `;
+
+                    return;
+                }
+
+
+                data.forEach(student => {
+
+                    tabla.innerHTML += `
+                        <tr>
+
+                            <td>
+                                ${student.id}
+                            </td>
+
+                            <td>
+                                ${student.first_name}
+                            </td>
+
+                            <td>
+                                ${student.last_name}
+                            </td>
+
+                            <td>
+
+                                <button
+                                    class="btn btn-warning btn-sm"
+                                    onclick="editarEstudiante(
+                                        ${student.id},
+                                        '${student.first_name.replace(/'/g, "\\'")}',
+                                        '${student.last_name.replace(/'/g, "\\'")}'
+                                    )"
+                                >
+                                    Editar
+                                </button>
+
+                                <button
+                                    class="btn btn-danger btn-sm"
+                                    onclick="eliminarEstudiante(${student.id})"
+                                >
+                                    Eliminar
+                                </button>
+
+                            </td>
+
+                        </tr>
+                    `;
+
+                });
+
+            })
+
+            .catch(error => {
+
+                console.error(
+                    'Error al cargar estudiantes:',
+                    error
+                );
+
+            });
+
+    }
+
+
+    // ==========================================
+    // CREAR O ACTUALIZAR ESTUDIANTE
+    // ==========================================
+
+    formularioEstudiante.addEventListener(
+        'submit',
+        function(event) {
+
+            event.preventDefault();
+
+
+            const datos = {
+
+                first_name:
+                    nombreEstudiante.value,
+
+                last_name:
+                    apellidoEstudiante.value
+
+            };
+
+
+            const url = estudianteEnEdicion
+
+                ? `/api/students/${estudianteEnEdicion}/`
+
+                : '/api/students/';
+
+
+            const metodo = estudianteEnEdicion
+                ? 'PUT'
+                : 'POST';
+
+
+            fetch(url, {
+
+                method: metodo,
+
+                headers: {
+
+                    'Content-Type':
+                        'application/json',
+
+                    'X-CSRFToken':
+                        obtenerCsrfToken()
+
+                },
+
+                body: JSON.stringify(datos)
+
+            })
+
+            .then(response => {
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        'No se pudo guardar.'
+                    );
+
+                }
+
+                return response.json();
+
+            })
+
+            .then(() => {
+
+                limpiarFormulario();
+
+                cargarEstudiantes();
+
+            })
+
+            .catch(error => {
+
+                alert(
+                    'Error al guardar el estudiante.'
+                );
+
+                console.error(error);
+
+            });
+
+        }
+    );
+
+
+    // ==========================================
+    // EDITAR ESTUDIANTE
+    // ==========================================
+
+    function editarEstudiante(
+        id,
+        nombre,
+        apellido
+    ) {
+
+        estudianteEnEdicion = id;
+
+        nombreEstudiante.value = nombre;
+
+        apellidoEstudiante.value = apellido;
+
+        tituloFormulario.textContent =
+            'Editar Estudiante';
+
+        botonGuardar.textContent =
+            'Actualizar';
+
+        botonCancelar.classList.remove(
+            'd-none'
+        );
+
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+    }
+
+
+    // ==========================================
+    // ELIMINAR ESTUDIANTE
+    // ==========================================
+
+    function eliminarEstudiante(id) {
+
+        const confirmar = confirm(
+            '¿Desea eliminar este estudiante?'
+        );
+
+
+        if (!confirmar) {
+            return;
+        }
+
+
+        fetch(`/api/students/${id}/`, {
+
+            method: 'DELETE',
+
+            headers: {
+
+                'X-CSRFToken':
+                    obtenerCsrfToken()
+
+            }
+
+        })
+
+        .then(response => {
+
+            if (!response.ok) {
+
+                throw new Error(
+                    'No se pudo eliminar.'
+                );
+
+            }
+
+            cargarEstudiantes();
+
+        })
+
+        .catch(error => {
+
+            alert(
+                'No se pudo eliminar el estudiante.'
+            );
+
+            console.error(error);
+
+        });
+
+    }
+
+
+    // ==========================================
+    // LIMPIAR FORMULARIO
+    // ==========================================
+
+    function limpiarFormulario() {
+
+        estudianteEnEdicion = null;
+
+        formularioEstudiante.reset();
+
+        tituloFormulario.textContent =
+            'Nuevo Estudiante';
+
+        botonGuardar.textContent =
+            'Guardar';
+
+        botonCancelar.classList.add(
+            'd-none'
+        );
+
+    }
+
+
+    botonCancelar.addEventListener(
+        'click',
+        limpiarFormulario
+    );
+
+
+    // ==========================================
+    // CARGA INICIAL
+    // ==========================================
+
+    cargarEstudiantes();
+
+</script>
+
+{% endblock %}

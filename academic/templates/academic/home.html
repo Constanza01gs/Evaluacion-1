@@ -1,0 +1,93 @@
+{% extends 'academic/base.html' %}
+
+{% block title %}
+Inicio | Gestión Académica
+{% endblock %}
+
+
+{% block content %}
+
+<!-- ==========================================
+     PORTADA PRINCIPAL
+=========================================== -->
+<section class="text-center py-5">
+
+    <h1 class="fw-bold mb-3">
+        Sistema de Gestión Académica
+    </h1>
+
+    <p class="lead text-muted mb-5">
+        Plataforma para consultar asignaturas,
+        docentes y estudiantes de manera organizada.
+    </p>
+
+
+    <!-- ==========================================
+         TARJETAS DE ACCESO
+    =========================================== -->
+    <div class="row justify-content-center g-4">
+
+        <!-- Asignaturas -->
+        <div class="col-md-5">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h3 class="card-title">
+                        Asignaturas
+                    </h3>
+
+                    <p class="card-text text-muted">
+                        Consulta las asignaturas registradas
+                        y el docente responsable de cada una.
+                    </p>
+
+                    <a
+                        href="{% url 'courses' %}"
+                        class="btn btn-primary"
+                    >
+                        Ver asignaturas
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Estudiantes -->
+        <div class="col-md-5">
+
+            <div class="card h-100 shadow-sm">
+
+                <div class="card-body p-4">
+
+                    <h3 class="card-title">
+                        Estudiantes
+                    </h3>
+
+                    <p class="card-text text-muted">
+                        Consulta el listado de estudiantes
+                        registrados en el sistema académico.
+                    </p>
+
+                    <a
+                        href="{% url 'students' %}"
+                        class="btn btn-primary"
+                    >
+                        Ver estudiantes
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
